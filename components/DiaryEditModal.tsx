@@ -16,22 +16,18 @@ import { format, parseISO } from "date-fns"
 import { ko } from "date-fns/locale"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { DiaryEntryTable, EmotionType } from '@/lib/diary-service'
 
 interface DiaryEditModalProps {
-  entry: {
-    id: string
-    content: string
-    createdAt: string
-  }
+  entry: DiaryEntryTable
   isOpen: boolean
   onClose: () => void
-  onSave: (id: string, content: string, createdAt: string) => void
+  onSave: (id: string, content: string, emotion?: EmotionType) => void
 }
 
 export function DiaryEditModal({ entry, isOpen, onClose, onSave }: DiaryEditModalProps) {
   const [content, setContent] = useState(entry.content)
-  const [date, setDate] = useState<Date>(parseISO(entry.createdAt))
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [date, setDate] = useState<Date>(parseISO(entry.created_at))
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +35,7 @@ export function DiaryEditModal({ entry, isOpen, onClose, onSave }: DiaryEditModa
       alert('일기 내용을 입력해주세요.')
       return
     }
-    onSave(entry.id, content, date.toISOString())
+    onSave(entry.id, content, entry.emotion)
     onClose()
   }
 
@@ -54,7 +50,7 @@ export function DiaryEditModal({ entry, isOpen, onClose, onSave }: DiaryEditModa
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
@@ -71,8 +67,7 @@ export function DiaryEditModal({ entry, isOpen, onClose, onSave }: DiaryEditModa
                   mode="single"
                   selected={date}
                   onSelect={(newDate) => {
-                    setDate(newDate || date)
-                    setIsCalendarOpen(false)
+                    if (newDate) setDate(newDate)
                   }}
                   initialFocus
                   locale={ko}

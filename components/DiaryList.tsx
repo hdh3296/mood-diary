@@ -11,7 +11,7 @@ import { DiaryEditModal } from "./DiaryEditModal"
 import { cn } from "@/lib/utils"
 import { EmotionIcon } from "./EmotionIcon"
 import { DiaryDetailModal } from "./DiaryDetailModal"
-import { DiaryEntryTable, deleteDiary, updateDiary } from '@/lib/diary-service'
+import { DiaryEntryTable, deleteDiary, updateDiary, EmotionType } from '@/lib/diary-service'
 
 interface DiaryListProps {
   diaries: DiaryEntryTable[]
@@ -59,7 +59,7 @@ export function DiaryList({ diaries }: DiaryListProps) {
                   "transition-colors cursor-pointer",
                   entry.emotion && `border-l-4`
                 )}
-                style={{ borderLeftColor: entry.emotion_color }}
+                style={{ borderLeftColor: entry.emotion_color || undefined }}
                 onClick={() => setSelectedEntry(entry)}
               >
                 <CardHeader className="py-3">
