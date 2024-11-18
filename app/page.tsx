@@ -5,9 +5,10 @@ import { DiaryList } from '@/components/DiaryList'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getAllDiaries } from '@/lib/diary-service'
+import type { DiaryEntryTable } from '@/lib/diary-service'
 
 export default function Home() {
-  const [diaries, setDiaries] = useState([])
+  const [diaries, setDiaries] = useState<DiaryEntryTable[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleDiarySubmit = () => {

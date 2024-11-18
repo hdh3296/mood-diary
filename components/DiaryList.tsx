@@ -8,63 +8,65 @@ import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { DiaryEditModal } from "./DiaryEditModal"
-import { DiaryEntry } from '@/lib/types'
 import { cn } from "@/lib/utils"
 import { EmotionIcon } from "./EmotionIcon"
 import { DiaryDetailModal } from "./DiaryDetailModal"
+import { DiaryEntryTable, deleteDiary, updateDiary } from '@/lib/diary-service'
 
-export function DiaryList() {
-  const [entries, setEntries] = useState<DiaryEntry[]>([])
-  const [editingEntry, setEditingEntry] = useState<DiaryEntry | null>(null)
-  const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
+interface DiaryListProps {
+  diaries: DiaryEntryTable[]
+}
 
-  useEffect(() => {
-    const storedEntries = localStorage.getItem('diaryEntries')
-    setEntries(storedEntries ? JSON.parse(storedEntries) : [])
-  }, [])
+export function DiaryList({ diaries }: DiaryListProps) {
+  const [editingEntry, setEditingEntry] = useState<DiaryEntryTable | null>(null)
+  const [selectedEntry, setSelectedEntry] = useState<DiaryEntryTable | null>(null)
 
-  const handleEdit = (entry: DiaryEntry) => {
+  const handleEdit = (entry: DiaryEntryTable) => {
     setEditingEntry(entry)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('정말로 이 일기를 삭제하시겠습니까?')) {
-      const updatedEntries = entries.filter(entry => entry.id !== id)
-      localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries))
-      setEntries(updatedEntries)
+      try {
+        await deleteDiary(id)
+        window.location.reload() // 페이지 새로고침
+      } catch (error) {
+        console.error('일기 삭제 중 오류 발생:', error)
+      }
     }
   }
 
-  const handleSave = (id: string, content: string, createdAt: string) => {
-    const updatedEntries = entries.map(entry =>
-      entry.id === id ? { ...entry, content, createdAt } : entry
-    )
-    localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries))
-    setEntries(updatedEntries)
+  const handleSave = async (id: string, content: string, emotion?: EmotionType) => {
+    try {
+      await updateDiary(id, content, emotion)
+      window.location.reload() // 페이지 새로고침
+    } catch (error) {
+      console.error('일기 수정 중 오류 발생:', error)
+    }
   }
 
   return (
     <>
       <ScrollArea className="h-[400px] rounded-md border">
         <div className="p-4 space-y-4">
-          {entries.length === 0 ? (
+          {diaries.length === 0 ? (
             <p className="text-center text-muted-foreground">작성된 일기가 없습니다.</p>
           ) : (
-            entries.map((entry) => (
+            diaries.map((entry) => (
               <Card 
                 key={entry.id}
                 className={cn(
                   "transition-colors cursor-pointer",
                   entry.emotion && `border-l-4`
                 )}
-                style={{ borderLeftColor: entry.emotionColor }}
+                style={{ borderLeftColor: entry.emotion_color }}
                 onClick={() => setSelectedEntry(entry)}
               >
                 <CardHeader className="py-3">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <div className="font-medium">
-                        {format(parseISO(entry.createdAt), 'PPP (EEEE)', { locale: ko })}
+                        {format(parseISO(entry.created_at), 'PPP (EEEE)', { locale: ko })}
                       </div>
                       <div className="flex items-center gap-1">
                         {entry.emotion && <EmotionIcon emotion={entry.emotion} />}
@@ -77,14 +79,20 @@ export function DiaryList() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(entry)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEdit(entry)
+                        }}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(entry.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(entry.id)
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
