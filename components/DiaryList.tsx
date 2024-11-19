@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from 'react'
 import { DiaryEditModal } from "./DiaryEditModal"
 import { cn } from "@/lib/utils"
 import { EmotionIcon } from "./EmotionIcon"

@@ -9,8 +9,7 @@ const nextConfig = {
   // 환경 변수 설정
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  },
-  analytics: true,
+  }
 };
 
 export default nextConfig;
