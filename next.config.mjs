@@ -6,8 +6,6 @@ const nextConfig = {
   },
   // 빌드 최적화
   swcMinify: true,
-  // 정적 내보내기 설정
-  output: 'standalone',
 };
 
 export default nextConfig;

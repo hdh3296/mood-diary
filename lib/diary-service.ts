@@ -32,8 +32,7 @@ export interface DiaryEntryTable {
 
 // 모든 일기 조회
 export async function getAllDiaries() {
-  // 서버 사이드 렌더링 시 빈 배열 반환
-  if (typeof window === 'undefined') {
+  if (!supabase) {
     return []
   }
 
@@ -48,6 +47,10 @@ export async function getAllDiaries() {
 
 // 특정 일기 조회
 export async function getDiaryById(id: string) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized')
+  }
+
   const { data, error } = await supabase
     .from('diary_entries')
     .select('*')
@@ -60,6 +63,10 @@ export async function getDiaryById(id: string) {
 
 // 일기 작성
 export async function createDiary(content: string, emotion?: EmotionType) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized')
+  }
+
   const { data, error } = await supabase
     .from('diary_entries')
     .insert([
