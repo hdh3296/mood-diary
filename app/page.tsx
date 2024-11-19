@@ -1,15 +1,16 @@
 'use client'
 
-import { DiaryEditor } from '@/components/DiaryEditor'
-import { DiaryList } from '@/components/DiaryList'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getAllDiaries } from '@/lib/diary-service'
-import type { DiaryEntryTable } from '@/lib/diary-service'
+import { DiaryEditor } from '@/components/DiaryEditor'
+import { DiaryList } from '@/components/DiaryList'
+import { DiaryEntryTable, getAllDiaries } from '@/lib/diary-service'
 
 export default function Home() {
   const [diaries, setDiaries] = useState<DiaryEntryTable[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDiarySubmit = () => {
     setRefreshKey(prev => prev + 1)
@@ -17,16 +18,28 @@ export default function Home() {
 
   const fetchDiaries = async () => {
     try {
+      setIsLoading(true)
       const fetchedDiaries = await getAllDiaries()
       setDiaries(fetchedDiaries)
     } catch (error) {
       console.error('일기 목록을 가져오는 중 오류 발생:', error)
+      setError('일기 목록을 불러오는데 실패했습니다.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
     fetchDiaries()
   }, [refreshKey])
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">{error}</p>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -57,7 +70,11 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <h2 className="text-2xl font-semibold text-purple-700 mb-6">일기 목록</h2>
-          <DiaryList diaries={diaries} key={refreshKey} />
+          {isLoading ? (
+            <div className="text-center py-4">로딩 중...</div>
+          ) : (
+            <DiaryList diaries={diaries} key={refreshKey} />
+          )}
         </motion.section>
       </div>
     </main>
