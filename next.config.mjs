@@ -7,16 +7,11 @@ const nextConfig = {
   // 빌드 최적화
   swcMinify: true,
   // 404 에러 로그 숨기기
-  async headers() {
+  async rewrites() {
     return [
       {
         source: '/.well-known/vercel/microfrontend-routing',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/json',
-          },
-        ],
+        destination: '/api/microfrontend-routing',
       },
     ]
   },
