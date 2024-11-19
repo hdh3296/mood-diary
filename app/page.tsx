@@ -11,6 +11,11 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const handleDiarySubmit = () => {
     setRefreshKey(prev => prev + 1)
@@ -32,6 +37,14 @@ export default function Home() {
   useEffect(() => {
     fetchDiaries()
   }, [refreshKey])
+
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    )
+  }
 
   if (error) {
     return (

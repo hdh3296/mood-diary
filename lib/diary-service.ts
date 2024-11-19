@@ -32,6 +32,11 @@ export interface DiaryEntryTable {
 
 // 모든 일기 조회
 export async function getAllDiaries() {
+  // 서버 사이드 렌더링 시 빈 배열 반환
+  if (typeof window === 'undefined') {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('diary_entries')
     .select('*')
