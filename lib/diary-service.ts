@@ -33,16 +33,28 @@ export interface DiaryEntryTable {
 // 모든 일기 조회
 export async function getAllDiaries() {
   if (!supabase) {
+    console.log('Supabase client not initialized in getAllDiaries')
     return []
   }
 
-  const { data, error } = await supabase
-    .from('diary_entries')
-    .select('*')
-    .order('created_at', { ascending: false })
+  try {
+    console.log('Fetching diaries...')
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-  if (error) throw error
-  return (data as unknown) as DiaryEntryTable[]
+    if (error) {
+      console.error('Error fetching diaries:', error)
+      throw error
+    }
+
+    console.log('Fetched diaries:', data)
+    return (data as unknown) as DiaryEntryTable[]
+  } catch (error) {
+    console.error('Error in getAllDiaries:', error)
+    throw error
+  }
 }
 
 // 특정 일기 조회
@@ -64,23 +76,35 @@ export async function getDiaryById(id: string) {
 // 일기 작성
 export async function createDiary(content: string, emotion?: EmotionType) {
   if (!supabase) {
+    console.error('Supabase client not initialized in createDiary')
     throw new Error('Supabase client not initialized')
   }
 
-  const { data, error } = await supabase
-    .from('diary_entries')
-    .insert([
-      {
-        content,
-        emotion,
-        emotion_color: emotion ? EMOTION_COLORS[emotion] : null
-      }
-    ])
-    .select()
-    .single()
+  try {
+    console.log('Creating diary with:', { content, emotion })
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .insert([
+        {
+          content,
+          emotion,
+          emotion_color: emotion ? EMOTION_COLORS[emotion] : null
+        }
+      ])
+      .select()
+      .single()
 
-  if (error) throw error
-  return (data as unknown) as DiaryEntryTable
+    if (error) {
+      console.error('Error creating diary:', error)
+      throw error
+    }
+
+    console.log('Created diary:', data)
+    return (data as unknown) as DiaryEntryTable
+  } catch (error) {
+    console.error('Error in createDiary:', error)
+    throw error
+  }
 }
 
 // 일기 수정

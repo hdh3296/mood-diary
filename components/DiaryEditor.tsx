@@ -1,16 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useState } from "react"
-import { format } from "date-fns"
-import { ko } from "date-fns/locale"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { analyzeEmotion } from "@/app/actions/analyze-emotion"
-import { emotionColors } from "@/lib/types"
+import { analyzeEmotion } from '@/app/actions/analyze-emotion'
+import { createDiary } from '@/lib/diary-service'
 
 interface DiaryEditorProps {
   onSubmitSuccess: () => void
@@ -18,8 +12,6 @@ interface DiaryEditorProps {
 
 export function DiaryEditor({ onSubmitSuccess }: DiaryEditorProps) {
   const [content, setContent] = useState('')
-  const [date, setDate] = useState<Date>(new Date())
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,23 +32,13 @@ export function DiaryEditor({ onSubmitSuccess }: DiaryEditorProps) {
       const emotion = await analyzeEmotion(content)
       console.log('분석된 감정:', emotion)
 
-      const entry = {
-        id: Date.now().toString(),
-        content,
-        createdAt: date.toISOString(),
-        emotion,
-        emotionColor: emotionColors[emotion]
-      }
-      console.log('저장할 일기 데이터:', entry)
-
-      // 로컬 스토리지에 저장
-      const existingEntries = JSON.parse(localStorage.getItem('diaryEntries') || '[]')
-      localStorage.setItem('diaryEntries', JSON.stringify([entry, ...existingEntries]))
-      console.log('로컬 스토리지 저장 완료')
+      // 일기 저장
+      console.log('일기 저장 중...')
+      const savedDiary = await createDiary(content, emotion)
+      console.log('저장된 일기:', savedDiary)
 
       // 입력 필드 초기화
       setContent('')
-      setDate(new Date())
       alert('일기가 저장되었습니다.')
       onSubmitSuccess()
       console.log('=== 일기 저장 완료 ===')
@@ -71,42 +53,17 @@ export function DiaryEditor({ onSubmitSuccess }: DiaryEditorProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-[240px] justify-start text-left font-normal",
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP (EEEE)', { locale: ko }) : <span>날짜 선택</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(newDate) => {
-                setDate(newDate || date)
-                setIsCalendarOpen(false)
-              }}
-              initialFocus
-              locale={ko}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
       <Textarea
-        placeholder="오늘의 일기를 작성해주세요..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        placeholder="오늘의 기분은 어떠신가요?"
         className="min-h-[200px]"
       />
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? '분석 중...' : '저장하기'}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? '저장 중...' : '저장하기'}
+        </Button>
+      </div>
     </form>
   )
 } 
