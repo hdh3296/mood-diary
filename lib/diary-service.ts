@@ -42,7 +42,7 @@ export async function getAllDiaries() {
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return data as DiaryEntryTable[]
+  return (data as unknown) as DiaryEntryTable[]
 }
 
 // 특정 일기 조회
@@ -58,7 +58,7 @@ export async function getDiaryById(id: string) {
     .single()
 
   if (error) throw error
-  return data as DiaryEntryTable
+  return (data as unknown) as DiaryEntryTable
 }
 
 // 일기 작성
@@ -80,7 +80,7 @@ export async function createDiary(content: string, emotion?: EmotionType) {
     .single()
 
   if (error) throw error
-  return data as DiaryEntryTable
+  return (data as unknown) as DiaryEntryTable
 }
 
 // 일기 수정
@@ -89,6 +89,10 @@ export async function updateDiary(
   content: string,
   emotion?: EmotionType
 ) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized')
+  }
+
   const { data, error } = await supabase
     .from('diary_entries')
     .update({
@@ -101,11 +105,15 @@ export async function updateDiary(
     .single()
 
   if (error) throw error
-  return data as DiaryEntryTable
+  return (data as unknown) as DiaryEntryTable
 }
 
 // 일기 삭제
 export async function deleteDiary(id: string) {
+  if (!supabase) {
+    throw new Error('Supabase client not initialized')
+  }
+
   const { error } = await supabase
     .from('diary_entries')
     .delete()
