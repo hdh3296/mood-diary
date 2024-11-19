@@ -15,6 +15,8 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true)
+    console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+    console.log('SUPABASE_KEY exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   }, [])
 
   const handleDiarySubmit = () => {
@@ -24,32 +26,41 @@ export default function Home() {
   const fetchDiaries = async () => {
     try {
       setIsLoading(true)
+      setError(null)
       const fetchedDiaries = await getAllDiaries()
       setDiaries(fetchedDiaries)
     } catch (error) {
       console.error('일기 목록을 가져오는 중 오류 발생:', error)
-      setError('일기 목록을 불러오는데 실패했습니다.')
+      setError(error instanceof Error ? error.message : '일기 목록을 불러오는데 실패했습니다.')
     } finally {
       setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchDiaries()
-  }, [refreshKey])
+    if (isClient) {
+      fetchDiaries()
+    }
+  }, [refreshKey, isClient])
 
   if (!isClient) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+        <p className="text-purple-600">Loading...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <p className="text-red-500">{error}</p>
+        <button 
+          onClick={() => setRefreshKey(prev => prev + 1)}
+          className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+        >
+          다시 시도
+        </button>
       </div>
     )
   }
@@ -84,7 +95,7 @@ export default function Home() {
         >
           <h2 className="text-2xl font-semibold text-purple-700 mb-6">일기 목록</h2>
           {isLoading ? (
-            <div className="text-center py-4">로딩 중...</div>
+            <div className="text-center py-4 text-purple-600">로딩 중...</div>
           ) : (
             <DiaryList diaries={diaries} key={refreshKey} />
           )}
