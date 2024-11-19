@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
+import { format, parseISO } from "date-fns"
+import { ko } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -11,9 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useState } from "react"
-import { format, parseISO } from "date-fns"
-import { ko } from "date-fns/locale"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Textarea } from "@/components/ui/textarea"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DiaryEntryTable, EmotionType } from '@/lib/diary-service'
@@ -22,7 +26,7 @@ interface DiaryEditModalProps {
   entry: DiaryEntryTable
   isOpen: boolean
   onClose: () => void
-  onSave: (id: string, content: string, emotion?: EmotionType) => void
+  onSave: (id: string, content: string, emotion: EmotionType | undefined) => void
 }
 
 export function DiaryEditModal({ entry, isOpen, onClose, onSave }: DiaryEditModalProps) {

@@ -26,8 +26,8 @@ export interface DiaryEntryTable {
   id: string
   content: string
   created_at: string
-  emotion: EmotionType | null
-  emotion_color: string | null
+  emotion?: EmotionType
+  emotion_color?: string
 }
 
 // 모든 일기 조회
