@@ -13,7 +13,8 @@ export const supabase = createClient(
   {
     auth: {
       persistSession: false,
-    },
-    isBrowser: typeof window !== 'undefined',
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
   }
 )
